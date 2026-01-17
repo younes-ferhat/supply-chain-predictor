@@ -6,6 +6,7 @@ from fpdf import FPDF
 import datetime
 import numpy as np
 from sklearn.metrics import mean_absolute_error
+import os
 
 # --- CONFIGURATION ---
 st.set_page_config(page_title="Supply Chain AI Predictor", layout="wide", initial_sidebar_state="expanded")
@@ -35,10 +36,19 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stSelectbox > div > div,
-    [data-testid="stSidebar"] .stFileUploader > div > div {
+    [data-testid="stSidebar"] .stFileUploader > div > div,
+    [data-testid="stSidebar"] .stRadio > div {
         background-color: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 8px;
+    }
+    
+    /* CONTENU PRINCIPAL */
+    h1 {
+        background: -webkit-linear-gradient(45deg, #2563eb, #9333ea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -1px;
     }
     
     /* CARTES MÉTRIQUES */
@@ -140,12 +150,11 @@ def calculate_abc_classification(df, col_item, col_sales):
     abc_summary['class'] = abc_summary['cum_pct'].apply(lambda x: 'A' if x <= 0.8 else ('B' if x <= 0.95 else 'C'))
     return abc_summary.set_index(col_item)['class'].to_dict()
 
-# --- NOUVELLE FONCTION PDF PRO ---
 class PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 15)
         self.set_text_color(44, 62, 80)
-        self.cell(0, 10, 'SUPPLY CHAIN AI - Rapport de Prevision', 0, 1, 'C')
+        self.cell(0, 10, 'SUPPLY CHAIN AI PREDICTOR - Rapport', 0, 1, 'C')
         self.ln(5)
 
     def footer(self):
@@ -156,14 +165,11 @@ class PDF(FPDF):
 def create_pdf(item, forecast, safety, cmd, service, abc, score, mae):
     pdf = PDF()
     pdf.add_page()
-    
-    # Date du rapport
     today = datetime.datetime.now().strftime("%d/%m/%Y")
     pdf.set_font("Arial", 'I', 10)
     pdf.cell(0, 10, f"Date du rapport : {today}", 0, 1, 'R')
     pdf.ln(5)
 
-    # Section 1: Info Produit
     pdf.set_font("Arial", 'B', 12)
     pdf.set_fill_color(240, 240, 240)
     pdf.cell(0, 10, f"  PRODUIT : {item}", 1, 1, 'L', 1)
@@ -172,45 +178,36 @@ def create_pdf(item, forecast, safety, cmd, service, abc, score, mae):
     pdf.cell(0, 8, f"  Niveau de Service Cible : {service*100}%", 0, 1)
     pdf.ln(5)
 
-    # Section 2: Analyse IA
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(0, 10, "  ANALYSE INTELLIGENTE", 1, 1, 'L', 1)
     pdf.set_font("Arial", '', 11)
-    
     confiance = "Elevee" if score > 70 else ("Moyenne" if score > 40 else "Faible (Nouveau Produit)")
     pdf.cell(0, 8, f"  Score de Confiance IA : {int(score)}/100 ({confiance})", 0, 1)
-    
     if mae > 0:
         pdf.cell(0, 8, f"  Marge d'erreur moyenne : {int(mae)} unites/jour", 0, 1)
     else:
         pdf.cell(0, 8, f"  Marge d'erreur : N/A (Historique insuffisant)", 0, 1)
     pdf.ln(5)
 
-    # Section 3: Recommandation
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(0, 10, "  PLAN D'APPROVISIONNEMENT (30 Jours)", 1, 1, 'L', 1)
     pdf.ln(5)
-    
     pdf.set_font("Arial", '', 11)
     pdf.cell(90, 10, "Prevision de la demande :", 0, 0)
     pdf.set_font("Arial", 'B', 11)
     pdf.cell(0, 10, f"{int(forecast)} unites", 0, 1)
-    
     pdf.set_font("Arial", '', 11)
     pdf.cell(90, 10, "Stock de Securite :", 0, 0)
     pdf.set_font("Arial", 'B', 11)
     pdf.cell(0, 10, f"{int(safety)} unites", 0, 1)
-    
     pdf.ln(5)
-    pdf.set_fill_color(220, 255, 220) # Vert clair
+    pdf.set_fill_color(220, 255, 220)
     pdf.set_font("Arial", 'B', 14)
     pdf.cell(0, 15, f"  COMMANDE RECOMMANDEE : {int(cmd)} unites", 1, 1, 'C', 1)
-
     return pdf.output(dest='S').encode('latin-1')
 
-# --- INTERFACE (TITRE AMÉLIORÉ) ---
+# --- INTERFACE ---
 
-# Titre centré avec dégradé CSS
 st.markdown("""
     <div style='text-align: center; margin-bottom: 30px;'>
         <h1 style='background: linear-gradient(to right, #2563eb, #9333ea); 
@@ -219,7 +216,7 @@ st.markdown("""
                    font-size: 3rem; 
                    font-weight: 800; 
                    margin-bottom: 0;'>
-            Supply Chain AI Predictor🚀
+            Supply Chain AI Predictor 🚀
         </h1>
         <p style='color: #64748b; font-size: 1.2rem; font-weight: 500;'>
             Pilotez vos stocks avec la puissance du Machine Learning
@@ -230,8 +227,26 @@ st.markdown("""
 # --- SIDEBAR ---
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
-    uploaded_file = st.file_uploader("Importer CSV", type=['csv'])
     
+    # OPTION DÉMO OU UPLOAD
+    data_source = st.radio("Source des données", ["Importer un fichier", "Utiliser données démo"], label_visibility="collapsed")
+    
+    uploaded_file = None
+    sample_mode = False
+    
+    if data_source == "Importer un fichier":
+        uploaded_file = st.file_uploader("Importer CSV", type=['csv'])
+        if uploaded_file:
+            st.success("Fichier importé avec succès !")
+    else:
+        # Mode Démo
+        if os.path.exists("train.csv"):
+            uploaded_file = "train.csv"
+            sample_mode = True
+            st.info("Mode Démo activé avec le fichier exemple.")
+        else:
+            st.error("Le fichier 'train.csv' est introuvable dans le répertoire.")
+
     if uploaded_file:
         st.divider()
         st.markdown("### 🛡️ Gestion des risques")
@@ -243,7 +258,11 @@ with st.sidebar:
 # --- TRAITEMENT ---
 if uploaded_file:
     try:
-        df_raw = pd.read_csv(uploaded_file, sep=None, engine='python')
+        # Lecture adaptée selon le mode
+        if sample_mode:
+            df_raw = pd.read_csv(uploaded_file) # Lecture directe du fichier local
+        else:
+            df_raw = pd.read_csv(uploaded_file, sep=None, engine='python') # Lecture robuste upload
     except Exception as e:
         st.error(f"Erreur lecture : {e}")
         st.stop()
@@ -281,10 +300,12 @@ if uploaded_file:
     # Conversion Date
     try:
         df_raw[col_date] = pd.to_datetime(df_raw[col_date], errors='coerce', dayfirst=True)
-        if df_raw[col_date].isna().mean() > 0.30:
+        # Gestion format mixed si échec (Uniquement si ce n'est pas le mode démo)
+        if not sample_mode and df_raw[col_date].isna().mean() > 0.30:
             uploaded_file.seek(0)
             temp = pd.read_csv(uploaded_file, sep=None, engine='python')
             df_raw[col_date] = pd.to_datetime(temp[col_date], errors='coerce', format='mixed', dayfirst=True)
+        
         df_raw = df_raw.dropna(subset=[col_date])
         if df_raw.empty: st.error("Dates illisibles."); st.stop()
     except Exception as e:
@@ -388,9 +409,10 @@ if uploaded_file:
         fig_fut.update_layout(template="plotly_white", margin=dict(l=0,r=0,t=30,b=0), height=400)
         st.plotly_chart(fig_fut, use_container_width=True)
 
-        # PDF avec arguments
+        # PDF
         pdf = create_pdf(selected_item, pred_30, safety, cmd, service_level, curr_class, score, mae)
         st.download_button("📄 Télécharger le Bon de Commande", pdf, f"Rapport_{selected_item}.pdf", use_container_width=True)
 
 else:
-    st.info("👋 Veuillez importer un fichier CSV dans la barre latérale.")
+    # Page d'accueil vide (invitation)
+    st.info("👋 Veuillez importer un fichier CSV ou utiliser les données de démonstration dans la barre latérale.")
