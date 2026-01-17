@@ -4,94 +4,94 @@
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 [![AI Model](https://img.shields.io/badge/Model-Prophet-orange)](https://facebook.github.io/prophet/)
 
-**Supply Chain AI Predictor** est une solution Data Science open-source conçue pour démocratiser la prévision de la demande. Elle permet aux Supply Chain Managers de passer de l'intuition (ou d'Excel) à une approche pilotée par l'Intelligence Artificielle.
+**Supply Chain AI Predictor** is an open-source Data Science solution designed to democratize demand forecasting. It allows Supply Chain Managers to move away from intuition (or Excel) towards an AI-driven approach.
 
-👉 **[Tester l'application en ligne (Démo disponible)][(https://supply-chain-predictor-jwdccg982ctiqzi4afhyjp.streamlit.app/)**
-
----
-
-## 🎯 Objectifs du Projet
-
-La gestion des stocks est un équilibre précaire : trop de stock coûte cher (BFR), pas assez fait perdre des ventes.
-Ce projet vise à :
-1.  **Automatiser** l'analyse des tendances de ventes.
-2.  **Sécuriser** les approvisionnements via un calcul statistique du stock de sécurité.
-3.  **Faciliter** la prise de décision avec un rapport PDF prêt à l'emploi.
+👉 **[Test the App Online (Live Demo)](https://supply-chain-predictor-jwdccg982ctiqzi4afhyjp.streamlit.app/)**
 
 ---
 
-## 🧠 L'Intelligence Artificielle sous le capot
+## 🎯 Project Objectives
 
-L'application utilise **Facebook Prophet**, un modèle de série temporelle additif.
-
-* **Pourquoi ce choix ?** Contrairement aux moyennes mobiles classiques, Prophet décompose le signal pour identifier :
-    * La tendance de fond (croissance/décroissance).
-    * La saisonnalité hebdomadaire (pics du week-end).
-    * La saisonnalité annuelle (Soldes, Noël, Black Friday).
-* **Audit de Confiance :** L'IA ne se contente pas de prédire. Elle compare ses prédictions passées avec la réalité pour s'attribuer un **Score de Fiabilité (0-100%)**. Si le score est bas, l'algorithme recommande automatiquement un stock de sécurité plus élevé.
+Inventory management is a precarious balance: too much stock is expensive (Working Capital), while too little leads to lost sales.
+This project aims to:
+1.  **Automate** sales trend analysis.
+2.  **Secure** replenishment via statistical safety stock calculation.
+3.  **Facilitate** decision-making with a ready-to-use PDF report.
 
 ---
 
-## ✨ Fonctionnalités Clés
+## 🧠 Under the Hood: The AI
 
-* **📂 Importation Universelle & Intelligente :** L'algorithme de mapping détecte seul les colonnes (Date, Quantité/Montant, Produit) peu importe le format de votre CSV (Amazon, ERP interne, etc.).
-* **🎮 Mode Démo Intégré :** Pas de données sous la main ? Activez le mode démo pour tester l'outil avec un jeu de données réel inclus.
-* **📊 Classification ABC :** Segmentation automatique des produits selon la loi de Pareto (les 20% des produits qui font 80% du CA).
-* **🛡️ Gestion des Risques :** Ajustement dynamique du stock de sécurité selon le taux de service cible (de 80% à 99.9%).
-* **📑 Reporting Automatisé :** Génération d'un Bon de Commande PDF incluant les métriques clés et la décision de l'IA.
+The application uses **Facebook Prophet**, an additive time-series model.
 
----
-
-## 💾 Données attendues
-
-L'application accepte tout fichier **CSV** (`.csv`).
-L'algorithme de détection cherche :
-1.  **Une colonne Temporelle :** (Format date détecté automatiquement).
-2.  **Une colonne Métrique :** (Unités vendues, Chiffre d'affaires, Quantité...).
-3.  **Une colonne Identifiant :** (Nom du produit, SKU, ID...).
-
-*Note : Le séparateur (virgule ou point-virgule) est détecté automatiquement.*
+* **Why this choice?** Unlike classic moving averages, Prophet decomposes the signal to identify:
+    * The underlying trend (growth/decline).
+    * Weekly seasonality (weekend peaks).
+    * Yearly seasonality (Sales, Christmas, Black Friday).
+* **Confidence Audit:** The AI doesn't just predict. It compares its past predictions with reality to assign itself a **Reliability Score (0-100%)**. If the score is low, the algorithm automatically recommends a higher safety stock.
 
 ---
 
-## 🚧 Limites actuelles & Roadmap
+## ✨ Key Features
 
-Ce projet est en constante évolution. Voici les axes d'amélioration identifiés :
-
-* **Scope actuel :** Prévision mono-produit (un produit à la fois).
-    * *Amélioration prévue :* Tableau de bord global pour visualiser tout le catalogue d'un coup.
-* **Facteurs externes :** Le modèle se base uniquement sur l'historique.
-    * *Amélioration prévue :* Intégration de variables exogènes (météo, budget marketing, promotions) via un modèle XGBoost.
-* **Données :** Traitement de fichiers CSV locaux.
-    * *Amélioration prévue :* Connexion directe à une base de données SQL ou une API (Shopify/WooCommerce).
+* **📂 Universal & Smart Import:** The mapping algorithm automatically detects columns (Date, Quantity/Amount, Product) regardless of your CSV format (Amazon, Internal ERP, etc.).
+* **🎮 Integrated Demo Mode:** No data on hand? Activate demo mode to test the tool with a real included dataset.
+* **📊 ABC Analysis:** Automatic product segmentation based on the Pareto principle (the 20% of products generating 80% of revenue).
+* **🛡️ Risk Management:** Dynamic safety stock adjustment based on the target service level (from 80% to 99.9%).
+* **📑 Automated Reporting:** Generation of a PDF Purchase Order including key metrics and the AI's decision.
 
 ---
 
-## 💻 Installation Locale
+## 💾 Expected Data
 
-Pour exécuter le projet sur votre machine :
+The application accepts any **CSV** file (`.csv`).
+The detection algorithm looks for:
+1.  **A Time Column:** (Date format detected automatically).
+2.  **A Metric Column:** (Units sold, Revenue, Quantity...).
+3.  **An Identifier Column:** (Product Name, SKU, ID...).
 
-1.  Cloner le dépôt :
+*Note: The separator (comma or semicolon) is detected automatically.*
+
+---
+
+## 🚧 Current Limitations & Roadmap
+
+This project is constantly evolving. Here are the identified areas for improvement:
+
+* **Current Scope:** Single-product forecasting (one product at a time).
+    * *Planned Improvement:* Global dashboard to visualize the entire catalog at once.
+* **External Factors:** The model is based solely on history.
+    * *Planned Improvement:* Integration of exogenous variables (weather, marketing budget, promotions) via an XGBoost model.
+* **Data Source:** Local CSV file processing.
+    * *Planned Improvement:* Direct connection to a SQL database or API (Shopify/WooCommerce).
+
+---
+
+## 💻 Local Installation
+
+To run the project on your machine:
+
+1.  Clone the repository:
     ```bash
-    git clone [https://github.com/VOTRE_PSEUDO/supply-chain-predictor.git](https://github.com/VOTRE_PSEUDO/supply-chain-predictor.git)
+    git clone [https://github.com/YOUR_USERNAME/supply-chain-predictor.git](https://github.com/YOUR_USERNAME/supply-chain-predictor.git)
     cd supply-chain-predictor
     ```
 
-2.  Installer les dépendances :
+2.  Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  Lancer l'application :
+3.  Launch the application:
     ```bash
     streamlit run app.py
     ```
 
 ---
 
-## 👤 Auteur
+## 👤 Author
 
 **Younes Ferhat**
-* [[Mon LinkedIn](VOTRE_LIEN_LINKEDIN)](https://www.linkedin.com/in/younes-ferhat)
+* [My LinkedIn](https://www.linkedin.com/in/younes-ferhat)
 
 ---
